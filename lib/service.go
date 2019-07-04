@@ -63,7 +63,7 @@ func GetPIIS(url string) (types.PIIS, error) {
 	if err != nil {
 		return ret, err
 	}
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
 		return ret, errors.New(string(resbody))
 	}
 	err = json.Unmarshal(resbody, &ret)

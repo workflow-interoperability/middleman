@@ -18,7 +18,7 @@ func ForwardOrderWorker(client worker.JobClient, job entities.Job) {
 	processID := "middleman"
 	IESMID := "2"
 	jobKey := job.GetKey()
-	log.Println("Start place order " + strconv.Itoa(int(jobKey)))
+	log.Println("Start forward order " + strconv.Itoa(int(jobKey)))
 
 	payload, err := job.GetVariablesAsMap()
 	if err != nil {
@@ -99,11 +99,10 @@ func ForwardOrderWorker(client worker.JobClient, job entities.Job) {
 		}
 		switch structMsg["$class"].(string) {
 		case "org.sysu.wf.PIISCreatedEvent":
-			if ok, err := publishPIIS(structMsg["id"].(string), &newIM, "supplier", c); err != nil {
-				lib.FailJob(client, job)
-				return
+			if ok, err := publishPIIS("3004", structMsg["id"].(string), &newIM, "supplier", c); err != nil {
+				continue
 			} else if ok {
-				payload["fromProcessInstanceID"].(map[string]string)["supplier"] = newIM.Payload.WorkflowRelevantData.To.ProcessInstanceID
+				payload["fromProcessInstanceID"].(map[string]interface{})["supplier"] = newIM.Payload.WorkflowRelevantData.To.ProcessInstanceID
 				finished = true
 				break
 			}

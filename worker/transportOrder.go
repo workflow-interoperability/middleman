@@ -18,7 +18,7 @@ func TransportOrderWorker(client worker.JobClient, job entities.Job) {
 	processID := "middleman"
 	IESMID := "3"
 	jobKey := job.GetKey()
-	log.Println("Start place order " + strconv.Itoa(int(jobKey)))
+	log.Println("Start transport order " + strconv.Itoa(int(jobKey)))
 
 	payload, err := job.GetVariablesAsMap()
 	if err != nil {
@@ -99,11 +99,10 @@ func TransportOrderWorker(client worker.JobClient, job entities.Job) {
 		}
 		switch structMsg["$class"].(string) {
 		case "org.sysu.wf.PIISCreatedEvent":
-			if ok, err := publishPIIS(structMsg["id"].(string), &newIM, "special-carrier", c); err != nil {
-				lib.FailJob(client, job)
-				return
+			if ok, err := publishPIIS("3003", structMsg["id"].(string), &newIM, "special-carrier", c); err != nil {
+				continue
 			} else if ok {
-				payload["fromProcessInstanceID"].(map[string]string)["special-carrier"] = newIM.Payload.WorkflowRelevantData.To.ProcessInstanceID
+				payload["fromProcessInstanceID"].(map[string]interface{})["special-carrier"] = newIM.Payload.WorkflowRelevantData.To.ProcessInstanceID
 				finished = true
 				break
 			}
